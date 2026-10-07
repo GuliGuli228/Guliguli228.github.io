@@ -1330,19 +1330,62 @@ nodesEl.addEventListener('mouseout',e=>{ if(e.target.closest('.card')) setHi(nul
 stageEl.addEventListener('mouseleave',()=>setHi(null,false));
 
 let panning=false,sx=0,sy=0,stx=0,sty=0;
+const activeTouches=new Map();
+let pinching=false,pinchDistance=0,pinchMidpoint=null;
+function getTouchMidpoint(){
+  const points=[...activeTouches.values()];
+  return {x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2};
+}
 stageEl.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0) return;
+  if(e.pointerType==='touch'){
+    if(e.target.closest('button,input,textarea,a')) return;
+    activeTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(activeTouches.size===2){
+      panning=false;pinching=true;dragged=true;stageEl.classList.remove('dragging');
+      const r=stageEl.getBoundingClientRect(),mid=getTouchMidpoint();
+      pinchMidpoint={x:mid.x-r.left,y:mid.y-r.top};
+      pinchDistance=Math.hypot(activeTouches.get([...activeTouches.keys()][0]).x-activeTouches.get([...activeTouches.keys()][1]).x,
+        activeTouches.get([...activeTouches.keys()][0]).y-activeTouches.get([...activeTouches.keys()][1]).y);
+      e.preventDefault();return;
+    }
+    if(activeTouches.size>1) return;
+  }
   if(e.target.closest('button,input,textarea,a,.leaf')) { panning=false; return; }
   panning=true;dragged=false;sx=e.clientX;sy=e.clientY;stx=State.tx;sty=State.ty;
-  stageEl.classList.add('dragging'); stageEl.setPointerCapture(e.pointerId);
+  stageEl.classList.add('dragging');
+  if(e.pointerType==='mouse') stageEl.setPointerCapture(e.pointerId);
 });
 stageEl.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch'&&activeTouches.has(e.pointerId)){
+    activeTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinching&&activeTouches.size>=2){
+      const r=stageEl.getBoundingClientRect(),mid=getTouchMidpoint();
+      const nextMid={x:mid.x-r.left,y:mid.y-r.top};
+      const keys=[...activeTouches.keys()],a=activeTouches.get(keys[0]),b=activeTouches.get(keys[1]);
+      const nextDistance=Math.hypot(a.x-b.x,a.y-b.y);
+      const worldX=(pinchMidpoint.x-State.tx)/State.zoom,worldY=(pinchMidpoint.y-State.ty)/State.zoom;
+      const nextZoom=clamp(State.zoom*(pinchDistance?nextDistance/pinchDistance:1),CFG.minZoom,CFG.maxZoom);
+      State.tx=nextMid.x-worldX*nextZoom;State.ty=nextMid.y-worldY*nextZoom;State.zoom=nextZoom;
+      pinchDistance=nextDistance;pinchMidpoint=nextMid;apply();e.preventDefault();return;
+    }
+  }
   if(!panning) return;
   const dx=e.clientX-sx, dy=e.clientY-sy;
   if(Math.abs(dx)+Math.abs(dy)>6) dragged=true;
   State.tx=stx+dx; State.ty=sty+dy; apply();
 });
-['pointerup','pointercancel'].forEach(ev=>stageEl.addEventListener(ev,()=>{
+['pointerup','pointercancel'].forEach(ev=>stageEl.addEventListener(ev,e=>{
+  if(e.pointerType==='touch'){
+    activeTouches.delete(e.pointerId);
+    if(pinching&&activeTouches.size<2){
+      pinching=false;panning=false;pinchDistance=0;pinchMidpoint=null;stageEl.classList.remove('dragging');
+      if(!activeTouches.size)setTimeout(()=>dragged=false,0);
+    }else if(panning){
+      panning=false;stageEl.classList.remove('dragging');setTimeout(()=>dragged=false,0);
+    }
+    return;
+  }
   if(panning){panning=false;stageEl.classList.remove('dragging');setTimeout(()=>dragged=false,0);}
 }));
 stageEl.addEventListener('wheel',e=>{
