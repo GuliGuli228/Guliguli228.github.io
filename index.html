@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Roadmap — Инженер АСУ ТП / Industry 4.0</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter/index.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono/index.css">
@@ -139,7 +139,7 @@ code{font-family:'JetBrains Mono Variable',monospace;font-size:.9em;background:v
 .card.hit{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 26%,transparent),var(--shadow)}
 
 .card__head{display:flex;align-items:center;gap:9px;padding:13px 12px 11px 17px;cursor:pointer;flex:1}
-.card__ttl{font-size:var(--fs-lg);font-weight:750;line-height:1.25;letter-spacing:-.015em;margin:0}
+.card__ttl{font-size:var(--fs-lg);font-weight:750;line-height:1.25;letter-spacing:-.015em;margin:0;overflow-wrap:anywhere}
 .card__sub{font-size:var(--fs-xs);color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.35}
 .ringwrap{position:relative;width:34px;height:34px;flex:none;display:grid;place-items:center}
 .ring{width:34px;height:34px;transform:rotate(-90deg)}
@@ -306,6 +306,32 @@ pre{margin:0;padding:17px;border-radius:13px;background:var(--soft);border:1px s
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 @media (max-width:1000px){ .brand__txt,.progress__l,.legend{display:none} .panel{width:100%} }
+@media (max-width:640px){
+  .topbar{height:calc(60px + env(safe-area-inset-top));gap:6px;padding:env(safe-area-inset-top) 10px 0}
+  #stage{inset:calc(60px + env(safe-area-inset-top)) 0 0}
+  .brand{flex:0 0 38px;min-width:38px}
+  .search{flex:1 1 0;min-width:48px;margin-left:0}
+  .search input{height:40px;padding:0 10px 0 34px;font-size:13px;transition:border-color .18s,background .18s,box-shadow .18s}
+  .search.has-q input{padding-right:38px}
+  .search__cnt,.spacer{display:none}
+  .progress{flex:none;gap:5px;padding:0;border:0;background:transparent}
+  .progress__ring{width:30px;height:30px}
+  .tbtn{width:40px;height:40px}
+  .zoombar{right:calc(10px + env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));gap:3px;padding:5px}
+  .zoombar button{width:44px;height:44px;transition:background .14s,color .14s}
+  .panel{top:calc(60px + env(safe-area-inset-top))}
+  .panel__head{padding:18px 16px 15px}
+  .panel__body{padding:18px 16px calc(24px + env(safe-area-inset-bottom))}
+  .modal{padding:12px}
+  .modal__box{max-height:calc(100dvh - 24px);padding:20px;border-radius:14px}
+}
+@media (max-width:380px){
+  .progress__v{display:none}
+  .progress__ring{width:28px;height:28px}
+}
+@media (max-width:340px){
+  .progress{display:none}
+}
 </style>
 </head>
 <body>
@@ -484,8 +510,8 @@ const PALETTE = {
 
 /* --- Уровни ОБЯЗАТЕЛЬНОСТИ подтем: настройте цвета под себя --- */
 const LEVELS = {
-  must : { label:'Обязательно', color:'#ef4444' },
-  core : { label:'Важно',       color:'#f59e0b' },
+  must : { label:'Обязательно', color:'#18c75b' },
+  core : { label:'Важно',       color:'#ffe608' },
   extra: { label:'По желанию',  color:'#64748b' },
   bonus: { label:'Бонус',       color:'#8b5cf6' }
 };
@@ -1442,6 +1468,7 @@ function init(){
   window.addEventListener('resize',()=>apply());
 }
 init();
+document.fonts.ready.then(relayout);
 
 
 </script>
