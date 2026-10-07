@@ -110,7 +110,7 @@ code{font-family:'JetBrains Mono Variable',monospace;font-size:.9em;background:v
 #stage{
   position:fixed; inset:68px 0 0 0; overflow:hidden; cursor:grab; background-color:var(--bg);
   background-image:radial-gradient(var(--dots) 1.3px, transparent 1.3px);
-  background-size:24px 24px; touch-action:none;
+  background-size:24px 24px; touch-action:none; user-select:none; -webkit-user-select:none;
 }
 #stage.dragging{cursor:grabbing}
 #world{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
